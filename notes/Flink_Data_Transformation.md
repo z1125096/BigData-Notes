@@ -2,20 +2,38 @@
 <nav>
 <a href="#一Transformations-分类">一、Transformations 分类</a><br/>
 <a href="#二DataStream-Transformations">二、DataStream Transformations</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#21-Map-[DataStream-→-DataStream]">2.1 Map [DataStream → DataStream] </a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#22-FlatMap-[DataStream-→-DataStream]">2.2 FlatMap [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#23-Filter-[DataStream-→-DataStream]">2.3 Filter [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#24-KeyBy-和-Reduce">2.4 KeyBy 和 Reduce</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#25-Aggregations-[KeyedStream-→-DataStream]">2.5 Aggregations [KeyedStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#26-Union-[DataStream*-→-DataStream]">2.6 Union [DataStream* → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#27-Connect-[DataStreamDataStream-→-ConnectedStreams]">2.7 Connect [DataStream,DataStream → ConnectedStreams]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#28-Split-和-Select">2.8 Split 和 Select</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#29-project-[DataStream-→-DataStream]">2.9 project [DataStream → DataStream]</a><br/>
 <a href="#三物理分区">三、物理分区</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#31-Random-partitioning-[DataStream-→-DataStream]">3.1 Random partitioning [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#32-Rebalancing-[DataStream-→-DataStream]">3.2 Rebalancing [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#33-Rescaling-[DataStream-→-DataStream]">3.3 Rescaling [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#34-Broadcasting-[DataStream-→-DataStream]">3.4 Broadcasting [DataStream → DataStream]</a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#35-Custom-partitioning-[DataStream-→-DataStream]">3.5 Custom partitioning [DataStream → DataStream]</a><br/>
 <a href="#四任务链和资源组">四、任务链和资源组</a><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#41-startNewChain">4.1 startNewChain</a><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#42-disableChaining">4.2 disableChaining</a><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#43-slotSharingGroup">4.3 slotSharingGroup</a><br/>
 </nav>
 
+
+
 ## 一、Transformations 分类
 
 Flink 的 Transformations 操作主要用于将一个和多个 DataStream 按需转换成新的 DataStream。它主要分为以下三类：
 
 - **DataStream Transformations**：进行数据流相关转换操作；
-- **Physical partitioning**：物理分区。Flink 提供的底层 API ，允许用户在必要时可以控制数据的分区规则；
-- **Task chaining and resource groups**：任务链和资源组。允许用户进行任务链和资源组相关的细粒度控制。
+- **Physical partitioning**：物理分区。Flink 提供的底层 API ，允许用户定义数据的分区规则；
+- **Task chaining and resource groups**：任务链和资源组。允许用户进行任务链和资源组的细粒度的控制。
+
+以下分别对其主要 API 进行介绍：
 
 ## 二、DataStream Transformations
 
@@ -83,7 +101,7 @@ keyedStream.reduce((ReduceFunction<Tuple2<String, Integer>>) (value1, value2) ->
 KeyBy 操作存在以下两个限制：
 
 - KeyBy 操作用于用户自定义的 POJOs 类型时，该自定义类型必须重写 hashCode 方法；
-- KeyBy 操作不能用于任何数组类型。
+- KeyBy 操作不能用于数组类型。
 
 ### 2.5 Aggregations [KeyedStream → DataStream]
 
@@ -173,7 +191,7 @@ split.select("even").print();
 
 ### 2.9 project [DataStream → DataStream]
 
-project 主要用于获取  tuples 中的指定字段集，示例如下：
+project 主要用于获取 tuples 中的指定字段集，示例如下：
 
 ```java
 DataStreamSource<Tuple3<String, Integer, String>> streamSource = env.fromElements(
@@ -188,7 +206,7 @@ streamSource.project(0,2).print();
 
 ## 三、物理分区
 
-物理分区 (Physical partitioning) 是 Flink 提供的底层的 API，用于允许用户采用内置的分区规则或者自定义的分区规则来对数据进行分区，从而避免数据在某些分区上过于倾斜，常用的分区规则如下：
+物理分区 (Physical partitioning) 是 Flink 提供的底层的 API，允许用户采用内置的分区规则或者自定义的分区规则来对数据进行分区，从而避免数据在某些分区上过于倾斜，常用的分区规则如下：
 
 ### 3.1 Random partitioning [DataStream → DataStream]
 
@@ -216,9 +234,7 @@ dataStream.rescale();
 
 ReScale 这个单词具有重新缩放的意义，其对应的操作也是如此，具体如下：如果上游 operation 并行度为 2，而下游的 operation 并行度为 6，则其中 1 个上游的 operation 会将元素分发到 3 个下游 operation，另 1 个上游 operation 则会将元素分发到另外 3 个下游 operation。反之亦然，如果上游的 operation 并行度为 6，而下游 operation 并行度为 2，则其中 3 个上游 operation 会将元素分发到 1 个下游 operation，另 3 个上游 operation 会将元素分发到另外 1 个下游operation：
 
-<div align="center"> <img src="https://github.com/heibaiying/BigData-Notes/blob/master/pictures/flink-Rescaling.png"/> </div>
-
-
+<div align="center"> <img src="../pictures/flink-Rescaling.png"/> </div>
 
 
 ### 3.4 Broadcasting [DataStream → DataStream]
@@ -282,7 +298,7 @@ someStream.map(...).disableChaining();
 
 ### 4.3 slotSharingGroup
 
-slot 是任务管理器  (TaskManager) 所拥有资源的固定子集，每个操作 (operation) 的子任务 (sub task) 都需要获取 slot 来执行计算，但有的操作是资源密集型的，有的则是 CPU 密集型的，为了更好地利用资源，Flink 允许不同操作的子任务被部署到同一 slot 中。slotSharingGroup 用于设置操作的 slot 共享组 (slot sharing group) ，Flink 会将具有相同 slot 共享组的操作放到同一个 slot 中 。示例如下：
+slot 是任务管理器  (TaskManager) 所拥有资源的固定子集，每个操作 (operation) 的子任务 (sub task) 都需要获取 slot 来执行计算，但每个操作所需要资源的大小都是不相同的，为了更好地利用资源，Flink 允许不同操作的子任务被部署到同一 slot 中。slotSharingGroup 用于设置操作的 slot 共享组 (slot sharing group) ，Flink 会将具有相同 slot 共享组的操作放到同一个 slot 中 。示例如下：
 
 ```java
 someStream.filter(...).slotSharingGroup("slotSharingGroupName");

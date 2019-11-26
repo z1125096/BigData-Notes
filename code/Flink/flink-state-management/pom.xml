@@ -21,7 +21,7 @@ under the License.
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.heibaiying</groupId>
-	<artifactId>flink-time-watermark</artifactId>
+	<artifactId>flink-state-management</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
 
@@ -92,6 +92,11 @@ under the License.
 			<version>1.2.17</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-statebackend-rocksdb_2.11</artifactId>
+			<version>1.9.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -144,7 +149,7 @@ under the License.
 							</filters>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.heibaiying.WaterMarkJob</mainClass>
+									<mainClass>com.heibaiying.keyedstate.KeyedStateJob</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
